@@ -19,7 +19,109 @@ build:
    - sudo echo "versionName=$TAG_NAME" >> $JOB_STATE/cb-services-api-img.env
    - sudo echo "buildNumber=$BUILD_NUMBER" >> $JOB_STATE/cb-services-api-img.env
 
+jobs:
+  - name: cb-services-api_runCI
+    type: runCI
+    steps:
+      - OUT: cb-services-api-img
+  # - name: cb-duplicatecheck-api_runCI
+  #   type: runCI
+  #   steps:
+  #     - OUT: cb-duplicatecheck-api-img
 
+  - name: cb-services-api-man
+    type: manifest
+    steps:
+      - IN: cb-services-api-img
+      - IN: cb-services-docker-opts
+        applyTo:
+          - cb-services-api-img
+      # - IN: cb-postagger-api-img
+      # - IN: cb-postagger-docker-opts
+      #   applyTo:
+      #     - cb-postagger-api-img
+      # - IN: cb-grader-api-img
+      # - IN: cb-grader-docker-opts
+      #   applyTo:
+      #     - cb-grader-api-img
+      # - IN: cb-duplicatecheck-api-img
+      # - IN: cb-duplicatecheck-docker-opts
+      #   applyTo:
+      #     - cb-duplicatecheck-api-img
+      # - IN: cb-junkfilter-api-img
+      # - IN: cb-junkfilter-docker-opts
+      #   applyTo:
+      #     - cb-junkfilter-api-img
+      # - IN: cb-textinfo-api-img
+      # - IN: cb-textinfo-docker-opts
+      #   applyTo:
+      #     - cb-textinfo-api-img
+      # - IN: cb-essayornot-api-img
+      # - IN: cb-essayornot-docker-opts
+      #   applyTo:
+      #     - cb-essayornot-api-img
+      # - IN: cb-language-api-img
+      # - IN: cb-language-docker-opts
+      #   applyTo:
+      #     - cb-language-api-img
+      - TASK: managed
+    flags:
+      - cb-services-api
+
+  - name: cb-services-dev-api-ecs-deploy
+    type: deploy
+    steps:
+      - IN: cb-services-api-man
+      - IN: content-brain-clu
+      # - IN: cb-services-dev-awslogs-docker-opts
+      # - IN: cb-services-api-params
+      #   applyTo:
+      #     - cb-services-api-img
+      # - IN: cb-duplicatecheck-api-params
+      #   applyTo:
+      #     - cb-duplicatecheck-api-img
+      # - IN: cb-junkfilter-api-params
+      #   applyTo:
+      #     - cb-junkfilter-api-img
+      - TASK: managed
+        deployMethod: replace
+
+  - name: cb-services-rel
+    type: release
+    steps:
+      - IN: cb-services-api-ver
+      - IN: cb-services-dev-api-ecs-deploy
+      - TASK: managed
+
+  # - name: cb-services-api-ecs-deploy
+  #   type: deploy
+  #   steps:
+  #     - IN: cb-services-rel
+  #       switch: off
+  #     - IN: contentbrain-prod-clu
+  #     - IN: cb-services-awslogs-docker-opts
+  #     - IN: cb-services-prod-api-params
+  #       applyTo:
+  #         - cb-services-api-img
+  #     - IN: cb-duplicatecheck-api-params
+  #       applyTo:
+  #         - cb-duplicatecheck-api-img
+  #     - IN: cb-junkfilter-api-params
+  #       applyTo:
+  #         - cb-junkfilter-api-img
+  #     - TASK: managed
+  #       deployMethod: replace
+
+
+resources:
+  - name: cb-services-api-img
+    type: image
+    integration: studymode-ecr
+    pointer:
+      sourceName: "530443623308.dkr.ecr.us-east-1.amazonaws.com/test"
+      isPull: false
+    seed:
+      versionName: "cb-services"
 
 branches:
   only:
