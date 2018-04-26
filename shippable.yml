@@ -19,7 +19,6 @@ build:
    - sudo echo "versionName=$TAG_NAME" >> $JOB_STATE/cb-services-api-img.env
    - sudo echo "buildNumber=$BUILD_NUMBER" >> $JOB_STATE/cb-services-api-img.env
 
-
 branches:
   only:
     - master
